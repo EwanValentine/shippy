@@ -10,10 +10,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-const (
-	port = ":50051"
-)
-
 type Repository interface {
 	Create(*pb.Consignment) (*pb.Consignment, error)
 	GetAll() []*pb.Consignment
