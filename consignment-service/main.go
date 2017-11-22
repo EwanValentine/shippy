@@ -7,7 +7,7 @@ import (
 	"log"
 
 	pb "github.com/EwanValentine/shippy/consignment-service/proto/consignment"
-	vesselProto "github.com/ewanvalentine/shippy/vessel-service/proto/vessel"
+	vesselProto "github.com/EwanValentine/shippy/vessel-service/proto/vessel"
 	micro "github.com/micro/go-micro"
 	"golang.org/x/net/context"
 )
