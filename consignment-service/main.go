@@ -8,29 +8,46 @@ import (
 
 	pb "github.com/EwanValentine/shippy/consignment-service/proto/consignment"
 	vesselProto "github.com/EwanValentine/shippy/vessel-service/proto/vessel"
-	micro "github.com/micro/go-micro"
+	"github.com/micro/go-micro"
 	"golang.org/x/net/context"
+	"github.com/EwanValentine/shippy/consignment-service/datastore"
+	"gopkg.in/mgo.v2"
+	"os"
+)
+
+const (
+	dbName = "shippy"
+	consignmentCollection = "consignments"
+	defaultHost = "mongo:27017"
 )
 
 type Repository interface {
-	Create(*pb.Consignment) (*pb.Consignment, error)
-	GetAll() []*pb.Consignment
+	Create(*pb.Consignment) error
+	GetAll() ([]*pb.Consignment, error)
 }
 
 // Repository - Dummy repository, this simulates the use of a datastore
 // of some kind. We'll replace this with a real implementation later on.
 type ConsignmentRepository struct {
-	consignments []*pb.Consignment
+	session *mgo.Session
 }
 
-func (repo *ConsignmentRepository) Create(consignment *pb.Consignment) (*pb.Consignment, error) {
-	updated := append(repo.consignments, consignment)
-	repo.consignments = updated
-	return consignment, nil
+func (repo *ConsignmentRepository) Create(consignment *pb.Consignment) error {
+	return repo.collection().Insert(consignment)
 }
 
-func (repo *ConsignmentRepository) GetAll() []*pb.Consignment {
-	return repo.consignments
+func (repo *ConsignmentRepository) GetAll() ([]*pb.Consignment, error) {
+	var consignments []*pb.Consignment
+	err := repo.collection().Find(nil).All(&consignments)
+	return consignments, err
+}
+
+func (repo *ConsignmentRepository) Close() {
+	repo.session.Close()
+}
+
+func (repo *ConsignmentRepository) collection() *mgo.Collection {
+	return repo.session.DB(dbName).C(consignmentCollection)
 }
 
 // Service should implement all of the methods to satisfy the service
@@ -63,7 +80,7 @@ func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, re
 	req.VesselId = vesselResponse.Vessel.Id
 
 	// Save our consignment
-	consignment, err := s.repo.Create(req)
+	err = s.repo.Create(req)
 	if err != nil {
 		return err
 	}
@@ -71,19 +88,42 @@ func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, re
 	// Return matching the `Response` message we created in our
 	// protobuf definition.
 	res.Created = true
-	res.Consignment = consignment
+	res.Consignment = req
 	return nil
 }
 
 func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest, res *pb.Response) error {
-	consignments := s.repo.GetAll()
+	consignments, err := s.repo.GetAll()
+	if err != nil {
+		return err
+	}
 	res.Consignments = consignments
 	return nil
 }
 
 func main() {
 
-	repo := &ConsignmentRepository{}
+	// Database host from the environment variables
+	host := os.Getenv("DB_HOST")
+
+	if host == "" {
+		host = defaultHost
+	}
+
+	session, err := datastore.CreateSession(host)
+
+	// Mgo creates a 'master' session, we need to end that session
+	// before the main function closes.
+	defer session.Close()
+
+	if err != nil {
+
+		// We're wrapping the error returned from our CreateSession
+		// here to add some context to the error.
+		log.Panicf("Could not connect to datastore with host %s - %v", host, err)
+	}
+
+	repo := &ConsignmentRepository{session}
 
 	// Create a new service. Optionally include some options here.
 	srv := micro.NewService(
