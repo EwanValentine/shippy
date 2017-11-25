@@ -51,6 +51,7 @@ func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, re
 }
 
 func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest, res *pb.Response) error {
+	defer s.repo.Close()
 	consignments, err := s.repo.GetAll()
 	if err != nil {
 		return err
