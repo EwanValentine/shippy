@@ -1,35 +1,49 @@
 package main
 
-
 import (
 	"fmt"
 	"log"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"os"
+	pb "github.com/EwanValentine/shippy/user-service/proto/user"
+	"github.com/micro/go-micro"
 )
 
 func main() {
 
-	// Get database details from environment variables
-	host := os.Getenv("DB_HOST")
-	user := os.Getenv("DB_USER")
-	DBName := os.Getenv("DB_NAME")
-	password := os.Getenv("DB_PASSWORD")
-
-	db, err := gorm.Open(
-		"postgres",
-		fmt.Sprintf(
-			"host=%s user=%s dbname=%s sslmode=disable password=%s",
-			host, user, DBName, password,
-			),
-	)
-
+	// Creates a database connection and handles
+	// closing it again before exit.
+	db, err := CreateConnection()
 	defer db.Close()
 
 	if err != nil {
 		log.Fatalf("Could not connect to DB: %v", err)
 	}
 
-	// db.AutoMigrate(&User{})
+	// Automatically migrates the user struct
+	// into database columns/types etc. This will
+	// check for changes and migrate them each time
+	// this service is restarted.
+	db.AutoMigrate(&pb.User{})
+
+	repo := &UserRepository{db}
+
+	tokenService := &TokenService{repo}
+
+	// Create a new service. Optionally include some options here.
+	srv := micro.NewService(
+
+		// This name must match the package name given in your protobuf definition
+		micro.Name("go.micro.srv.consignment"),
+		micro.Version("latest"),
+	)
+
+	// Init will parse the command line flags.
+	srv.Init()
+
+	// Register handler
+	pb.RegisterUserServiceHandler(srv.Server(), &service{repo, tokenService})
+
+	// Run the server
+	if err := srv.Run(); err != nil {
+		fmt.Println(err)
+	}
 }
