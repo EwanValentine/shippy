@@ -9,7 +9,6 @@ import (
 	pb "github.com/EwanValentine/shippy/consignment-service/proto/consignment"
 	vesselProto "github.com/EwanValentine/shippy/vessel-service/proto/vessel"
 	"github.com/micro/go-micro"
-	"github.com/EwanValentine/shippy/consignment-service/datastore"
 	"os"
 )
 
@@ -26,7 +25,7 @@ func main() {
 		host = defaultHost
 	}
 
-	session, err := datastore.CreateSession(host)
+	session, err := CreateSession(host)
 
 	// Mgo creates a 'master' session, we need to end that session
 	// before the main function closes.
