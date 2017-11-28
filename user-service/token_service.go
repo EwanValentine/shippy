@@ -5,8 +5,14 @@ type Authable interface {
 	Encode(data interface{}) (string, error)
 }
 
-type TokenService struct{}
+type TokenService {
+	repo Repository
+}
 
-func (srv *TokenService) Decode(token string) (interface{}, error) {}
+func (srv *TokenService) Decode(token string) (interface{}, error) {
 
-func (srv *TokenService) Endode(data interface{}) (string, error) {}
+}
+
+func (srv *TokenService) Endode(data interface{}) (string, error) {
+
+}

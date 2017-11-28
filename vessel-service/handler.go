@@ -12,7 +12,7 @@ type service struct {
 }
 
 func (s *service) GetRepo() Repository {
-	return &VesselRepository{s.session.Copy()}
+	return &VesselRepository{s.session.Clone()}
 }
 
 func (s *service) FindAvailable(ctx context.Context, req *pb.Specification, res *pb.Response) error {
