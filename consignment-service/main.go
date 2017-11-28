@@ -38,8 +38,6 @@ func main() {
 		log.Panicf("Could not connect to datastore with host %s - %v", host, err)
 	}
 
-	repo := &ConsignmentRepository{session}
-
 	// Create a new service. Optionally include some options here.
 	srv := micro.NewService(
 
@@ -54,7 +52,7 @@ func main() {
 	srv.Init()
 
 	// Register handler
-	pb.RegisterShippingServiceHandler(srv.Server(), &service{repo, vesselClient})
+	pb.RegisterShippingServiceHandler(srv.Server(), &service{session, vesselClient})
 
 	// Run the server
 	if err := srv.Run(); err != nil {

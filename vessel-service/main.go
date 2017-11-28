@@ -15,6 +15,7 @@ const (
 )
 
 func createDummyData(repo Repository) {
+	defer repo.Close()
 	vessels := []*pb.Vessel{
 		{Id: "vessel001", Name: "Kane's Salty Secret", MaxWeight: 200000, Capacity: 500},
 	}
@@ -38,7 +39,7 @@ func main() {
 		log.Fatalf("Error connecting to datastore: %v", err)
 	}
 
-	repo := &VesselRepository{session}
+	repo := &VesselRepository{session.Copy()}
 
 	createDummyData(repo)
 
@@ -50,7 +51,7 @@ func main() {
 	srv.Init()
 
 	// Register our implementation with
-	pb.RegisterVesselServiceHandler(srv.Server(), &service{repo})
+	pb.RegisterVesselServiceHandler(srv.Server(), &service{session})
 
 	if err := srv.Run(); err != nil {
 		fmt.Println(err)

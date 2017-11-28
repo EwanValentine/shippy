@@ -3,17 +3,22 @@ package main
 import (
 	pb "github.com/EwanValentine/shippy/vessel-service/proto/vessel"
 	"golang.org/x/net/context"
+	"gopkg.in/mgo.v2"
 )
 
 // Our gRPC service handler
 type service struct {
-	repo Repository
+	session *mgo.Session
+}
+
+func (s *service) GetRepo() Repository {
+	return &VesselRepository{s.session.Copy()}
 }
 
 func (s *service) FindAvailable(ctx context.Context, req *pb.Specification, res *pb.Response) error {
-	defer s.repo.Close()
+	defer s.GetRepo().Close()
 	// Find the next available vessel
-	vessel, err := s.repo.FindAvailable(req)
+	vessel, err := s.GetRepo().FindAvailable(req)
 	if err != nil {
 		return err
 	}
@@ -24,8 +29,8 @@ func (s *service) FindAvailable(ctx context.Context, req *pb.Specification, res 
 }
 
 func (s *service) Create(ctx context.Context, req *pb.Vessel, res *pb.Response) error {
-	defer s.repo.Close()
-	if err := s.repo.Create(req); err != nil {
+	defer s.GetRepo().Close()
+	if err := s.GetRepo().Create(req); err != nil {
 		return err
 	}
 	res.Vessel = req
