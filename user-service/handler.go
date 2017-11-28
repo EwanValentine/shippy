@@ -33,7 +33,7 @@ func (srv *service) Auth(ctx context.Context, req *pb.User, res *pb.Token) error
 	if err != nil {
 		return err
 	}
-	res.Token = users
+	res.Token = "testingabc"
 	return nil
 }
 
@@ -42,5 +42,9 @@ func (srv *service) Create(ctx context.Context, req *pb.User, res *pb.Response) 
 		return err
 	}
 	res.User = req
+	return nil
+}
+
+func (srv *service) ValidateToken(ctx context.Context, req *pb.Token, res *pb.Token) error {
 	return nil
 }

@@ -5,7 +5,7 @@ type Authable interface {
 	Encode(data interface{}) (string, error)
 }
 
-type TokenService {
+type TokenService struct {
 	repo Repository
 }
 
