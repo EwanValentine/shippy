@@ -17,4 +17,6 @@ RUN mkdir /app
 WORKDIR /app
 COPY --from=builder /go/src/github.com/EwanValentine/shippy/user-cli/user-cli .
 
+ENTRYPOINT ["./user-cli"]
+
 CMD ["./user-cli"]

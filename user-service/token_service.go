@@ -10,9 +10,9 @@ type TokenService struct {
 }
 
 func (srv *TokenService) Decode(token string) (interface{}, error) {
-
+	return "", nil
 }
 
-func (srv *TokenService) Endode(data interface{}) (string, error) {
-
+func (srv *TokenService) Encode(data interface{}) (string, error) {
+	return "", nil
 }

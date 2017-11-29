@@ -29,7 +29,7 @@ func (srv *service) GetAll(ctx context.Context, req *pb.Request, res *pb.Respons
 }
 
 func (srv *service) Auth(ctx context.Context, req *pb.User, res *pb.Token) error {
-	user, err := srv.repo.GetByEmailAndPassword(req)
+	_, err := srv.repo.GetByEmailAndPassword(req)
 	if err != nil {
 		return err
 	}

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -10,14 +8,8 @@ import (
 	microclient "github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/cmd"
 	"golang.org/x/net/context"
-	"github.com/micro/go-web"
-)
-
-const (
-	defaultName = "Ewan Valentine"
-	defaultEmail = "ewan.valentine89@gmail.com"
-	defaultPassword = "Testing123"
-	defaultCompany = "BBC"
+	"github.com/micro/cli"
+	"github.com/micro/go-micro"
 )
 
 
@@ -28,35 +20,62 @@ func main() {
 	// Create new greeter client
 	client := pb.NewUserServiceClient("go.micro.srv.user", microclient.DefaultClient)
 
-	name := defaultName
-	email := defaultEmail
-	password := defaultPassword
-	company := defaultCompany
+	service := micro.NewService(
+		micro.Flags(
+			cli.StringFlag{
+				Name:  "name",
+				Usage: "You full name",
+			},
+			cli.StringFlag{
+				Name:  "email",
+				Usage: "Your email",
+			},
+			cli.StringFlag{
+				Name:  "password",
+				Usage: "Your password",
+			},
+			cli.StringFlag{
+				Name: "company",
+				Usage: "Your company",
+			},
+		),
+	)
 
-	// Contact the server and print out its response.
-	if len(os.Args) > 1 {
-		name = os.Args[1]
-		email = os.Args[2]
-		password = os.Args[3]
-		company = os.Args[4]
-	}
+	service.Init(
 
-	r, err := client.Create(context.TODO(), &pb.User{
-		Name: name,
-		Email: email,
-		Password: password,
-		Company: company,
-	})
-	if err != nil {
-		log.Fatalf("Could not create: %v", err)
-	}
-	log.Printf("Created: %t", r.User.Id)
+		micro.Action(func(c *cli.Context) {
 
-	getAll, err := client.GetAll(context.Background(), &pb.Request{})
-	if err != nil {
-		log.Fatalf("Could not list users: %v", err)
-	}
-	for _, v := range getAll.Users {
-		log.Println(v)
+			name := c.String("name")
+			email := c.String("email")
+			password := c.String("password")
+			company := c.String("company")
+
+			r, err := client.Create(context.TODO(), &pb.User{
+				Name: name,
+				Email: email,
+				Password: password,
+				Company: company,
+			})
+			if err != nil {
+				log.Fatalf("Could not create: %v", err)
+			}
+			log.Printf("Created: %t", r.User.Id)
+
+			getAll, err := client.GetAll(context.Background(), &pb.Request{})
+			if err != nil {
+				log.Fatalf("Could not list users: %v", err)
+			}
+			for _, v := range getAll.Users {
+				log.Println(v)
+			}
+
+			// let's just exit because
+			os.Exit(0)
+		}),
+	)
+
+	// Run the server
+	if err := service.Run(); err != nil {
+		log.Println(err)
 	}
 }

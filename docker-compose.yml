@@ -7,6 +7,11 @@ services:
     environment:
       MICRO_REGISTRY: "mdns"
 
+  user-cli:
+    build: ./user-cli
+    environment:
+      MICRO_REGISTRY: "mdns"
+
   consignment-service:
     build: ./consignment-service
     ports:
@@ -32,6 +37,11 @@ services:
     environment:
       MICRO_ADDRESS: ":50051"
       MICRO_REGISTRY: "mdns"
+      DB_NAME: "postgres"
+      DB_HOST: "database"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
 
   datastore:
     image: mongo
