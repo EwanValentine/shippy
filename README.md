@@ -1,6 +1,6 @@
 # Shippy
 
-This is the codebase for the multi-part series on writing microservices in Golang [found here](ewanvalentine.io).
+This is the codebase for the multi-part series on writing microservices in Golang [found here](https://ewanvalentine.io/).
 
 
 ## Table of contents (this may change as the series progresses).
