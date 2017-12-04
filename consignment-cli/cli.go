@@ -9,6 +9,7 @@ import (
 	pb "github.com/EwanValentine/shippy/consignment-service/proto/consignment"
 	microclient "github.com/micro/go-micro/client"
 	"github.com/micro/go-micro/cmd"
+	"github.com/micro/go-micro/metadata"
 	"golang.org/x/net/context"
 )
 
@@ -35,8 +36,10 @@ func main() {
 
 	// Contact the server and print out its response.
 	file := defaultFilename
+	var token string
 	if len(os.Args) > 1 {
 		file = os.Args[1]
+		token = os.Args[2]
 	}
 
 	consignment, err := parseFile(file)
@@ -51,7 +54,11 @@ func main() {
 	}
 	log.Printf("Created: %t", r.Created)
 
-	getAll, err := client.GetConsignments(context.Background(), &pb.GetRequest{})
+	ctx := metadata.NewContext(context.Background(), map[string]string{
+		"token": token,
+	})
+
+	getAll, err := client.GetConsignments(ctx, &pb.GetRequest{})
 	if err != nil {
 		log.Fatalf("Could not list consignments: %v", err)
 	}
