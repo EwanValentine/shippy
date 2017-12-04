@@ -29,11 +29,15 @@ func (srv *service) GetAll(ctx context.Context, req *pb.Request, res *pb.Respons
 }
 
 func (srv *service) Auth(ctx context.Context, req *pb.User, res *pb.Token) error {
-	_, err := srv.repo.GetByEmailAndPassword(req)
+	user, err := srv.repo.GetByEmailAndPassword(req)
 	if err != nil {
 		return err
 	}
-	res.Token = "testingabc"
+	token, err := srv.tokenService.Encode(user)
+	if err != nil {
+		return err
+	}
+	res.Token = token
 	return nil
 }
 
