@@ -3,7 +3,7 @@
 This is the codebase for the multi-part series on writing microservices in Golang [found here](https://ewanvalentine.io/).
 
 
-## Table of contents (this may change as the series progresses).
+## Table of contents (this may change as the series progresses)
 
 1. Tutorial one - `$ git checkout tutorial-1` - Microservice basics, gRPC and protobuf basics.
 2. Tutorial two - `$ git checkout tutorial-2` - Docker basics, creating a second service, integrating go-micro.
