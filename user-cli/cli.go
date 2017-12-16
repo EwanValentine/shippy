@@ -6,7 +6,6 @@ import (
 
 	pb "github.com/EwanValentine/shippy/user-service/proto/user"
 	microclient "github.com/micro/go-micro/client"
-	"github.com/micro/go-micro/cmd"
 	"golang.org/x/net/context"
 	"github.com/micro/cli"
 	"github.com/micro/go-micro"
@@ -15,40 +14,23 @@ import (
 
 func main() {
 
-	cmd.Init()
+	// cmd.Init()
 
 	// Create new greeter client
 	client := pb.NewUserServiceClient("go.micro.srv.user", microclient.DefaultClient)
 
-	service := micro.NewService(
-		micro.Flags(
-			cli.StringFlag{
-				Name:  "name",
-				Usage: "You full name",
-			},
-			cli.StringFlag{
-				Name:  "email",
-				Usage: "Your email",
-			},
-			cli.StringFlag{
-				Name:  "password",
-				Usage: "Your password",
-			},
-			cli.StringFlag{
-				Name: "company",
-				Usage: "Your company",
-			},
-		),
-	)
+	service := micro.NewService()
 
 	service.Init(
 
 		micro.Action(func(c *cli.Context) {
 
-			name := c.String("name")
-			email := c.String("email")
-			password := c.String("password")
-			company := c.String("company")
+			name := "Ewan Valentine"
+			email := "ewan.valentine89@gmail.com"
+			password := "test123"
+			company := "BBC"
+
+			log.Println(name, email, password)
 
 			r, err := client.Create(context.TODO(), &pb.User{
 				Name: name,
@@ -68,6 +50,17 @@ func main() {
 			for _, v := range getAll.Users {
 				log.Println(v)
 			}
+
+			authResponse, err := client.Auth(context.TODO(), &pb.User{
+				Email: email,
+				Password: password,
+			})
+
+			if err != nil {
+				log.Fatalf("Could not authenticate user: %s error: %v\n", email, err)
+			}
+
+			log.Printf("Your access token is: %s \n", authResponse.Token)
 
 			// let's just exit because
 			os.Exit(0)

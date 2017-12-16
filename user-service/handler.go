@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
 	"golang.org/x/net/context"
 	pb "github.com/EwanValentine/shippy/user-service/proto/user"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 type service struct {
@@ -30,7 +32,9 @@ func (srv *service) GetAll(ctx context.Context, req *pb.Request, res *pb.Respons
 }
 
 func (srv *service) Auth(ctx context.Context, req *pb.User, res *pb.Token) error {
-	user, err := srv.repo.GetByEmailAndPassword(req)
+	log.Println("Logging in with:", req.Email, req.Password)
+	user, err := srv.repo.GetByEmail(req.Email)
+	log.Println(user)
 	if err != nil {
 		return err
 	}
@@ -65,5 +69,19 @@ func (srv *service) Create(ctx context.Context, req *pb.User, res *pb.Response) 
 }
 
 func (srv *service) ValidateToken(ctx context.Context, req *pb.Token, res *pb.Token) error {
+
+	// Decode token
+	claims, err := srv.tokenService.Decode(req.Token)
+
+	if err != nil {
+		return err
+	}
+
+	if claims.User.Id == "" {
+		return errors.New("invalid user")
+	}
+
+	res.Valid = true
+
 	return nil
 }

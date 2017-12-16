@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	pb "github.com/EwanValentine/shippy/user-service/proto/user"
 )
 
 var (
@@ -15,13 +16,13 @@ var (
 // CustomClaims is our custom metadata, which will be hashed
 // and sent as the second segment in our JWT
 type CustomClaims struct {
-	Data interface{}
+	User *pb.User
 	jwt.StandardClaims
 }
 
 type Authable interface {
 	Decode(token string) (*CustomClaims, error)
-	Encode(data interface{}) (string, error)
+	Encode(user *pb.User) (string, error)
 }
 
 type TokenService struct {
@@ -45,10 +46,10 @@ func (srv *TokenService) Decode(token string) (*CustomClaims, error) {
 }
 
 // Encode a claim into a JWT
-func (srv *TokenService) Encode(data interface{}) (string, error) {
+func (srv *TokenService) Encode(user *pb.User) (string, error) {
 	// Create the Claims
 	claims := CustomClaims{
-		data,
+		user,
 		jwt.StandardClaims{
 			ExpiresAt: 15000,
 			Issuer:    "go.micro.srv.user",

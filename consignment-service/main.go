@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log"
 
-	"context"
+	"golang.org/x/net/context"
 	"os"
 
 	pb "github.com/EwanValentine/shippy/consignment-service/proto/consignment"
