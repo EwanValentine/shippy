@@ -2,9 +2,10 @@ package main
 
 import (
 	"log"
-	"golang.org/x/net/context"
+
 	pb "github.com/EwanValentine/shippy/consignment-service/proto/consignment"
 	vesselProto "github.com/EwanValentine/shippy/vessel-service/proto/vessel"
+	"golang.org/x/net/context"
 	"gopkg.in/mgo.v2"
 )
 
@@ -13,7 +14,7 @@ import (
 // in the generated code itself for the exact method signatures etc
 // to give you a better idea.
 type service struct {
-	session *mgo.Session
+	session      *mgo.Session
 	vesselClient vesselProto.VesselServiceClient
 }
 
@@ -25,13 +26,14 @@ func (s *service) GetRepo() Repository {
 // which is a create method, which takes a context and a request as an
 // argument, these are handled by the gRPC server.
 func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, res *pb.Response) error {
-	defer s.GetRepo().Close()
+	repo := s.GetRepo()
+	defer repo.Close()
 
 	// Here we call a client instance of our vessel service with our consignment weight,
 	// and the amount of containers as the capacity value
 	vesselResponse, err := s.vesselClient.FindAvailable(context.Background(), &vesselProto.Specification{
 		MaxWeight: req.Weight,
-		Capacity: int32(len(req.Containers)),
+		Capacity:  int32(len(req.Containers)),
 	})
 	log.Printf("Found vessel: %s \n", vesselResponse.Vessel.Name)
 	if err != nil {
@@ -43,7 +45,7 @@ func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, re
 	req.VesselId = vesselResponse.Vessel.Id
 
 	// Save our consignment
-	err = s.GetRepo().Create(req)
+	err = repo.Create(req)
 	if err != nil {
 		return err
 	}
@@ -56,8 +58,10 @@ func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment, re
 }
 
 func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest, res *pb.Response) error {
-	defer s.GetRepo().Close()
-	consignments, err := s.GetRepo().GetAll()
+	repo := s.GetRepo()
+	defer repo.Close()
+
+	consignments, err := repo.GetAll()
 	if err != nil {
 		return err
 	}

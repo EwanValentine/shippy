@@ -18,4 +18,5 @@ WORKDIR /app
 COPY consignment.json /app/consignment.json
 COPY --from=builder /go/src/github.com/EwanValentine/shippy/consignment-cli/consignment-cli .
 
+ENTRYPOINT ["./consignment-cli", "consignment.json"]
 CMD ["./consignment-cli"]
