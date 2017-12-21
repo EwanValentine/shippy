@@ -1,12 +1,10 @@
 FROM golang:1.9.0 as builder
 
+RUN go get -u github.com/EwanValentine/shippy/vessel-service
+
 WORKDIR /go/src/github.com/EwanValentine/shippy/vessel-service
 
-COPY . .
-
-RUN go get -u github.com/golang/dep/cmd/dep
-RUN dep init && dep ensure
-RUN CGO_ENABLED=0 GOOS=linux go build -o vessel-service -a -installsuffix cgo main.go repository.go handler.go datastore.go
+RUN go get && CGO_ENABLED=0 GOOS=linux go build -o vessel-service -a -installsuffix cgo main.go repository.go handler.go datastore.go
 
 
 FROM alpine:latest
