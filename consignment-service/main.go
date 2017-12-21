@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"log"
 
-	"golang.org/x/net/context"
 	"os"
+
+	"golang.org/x/net/context"
 
 	pb "github.com/EwanValentine/shippy/consignment-service/proto/consignment"
 	userService "github.com/EwanValentine/shippy/user-service/proto/user"
@@ -74,16 +75,20 @@ func AuthWrapper(fn server.HandlerFunc) server.HandlerFunc {
 		if !ok {
 			return errors.New("no auth meta-data found in request")
 		}
-		token := meta["token"]
+		token := meta["Token"]
 		log.Println("Authenticating with token: ", token)
+
 		// Auth here
 		authClient := userService.NewUserServiceClient("go.micro.srv.user", client.DefaultClient)
-		_, err := authClient.ValidateToken(context.Background(), &userService.Token{
+		authResp, err := authClient.ValidateToken(ctx, &userService.Token{
 			Token: token,
 		})
+		log.Println("Auth resp:", authResp)
+		log.Println("Err:", err)
 		if err != nil {
 			return err
 		}
+
 		err = fn(ctx, req, resp)
 		return err
 	}

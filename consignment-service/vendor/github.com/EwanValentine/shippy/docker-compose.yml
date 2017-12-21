@@ -1,0 +1,54 @@
+version: '3.1'
+
+services:
+
+  consignment-cli:
+    build: ./consignment-cli
+    environment:
+      MICRO_REGISTRY: "mdns"
+
+  user-cli:
+    build: ./user-cli
+    environment:
+      MICRO_REGISTRY: "mdns"
+
+  consignment-service:
+    build: ./consignment-service
+    ports:
+      - 50051:50051
+    environment:
+      MICRO_ADDRESS: ":50051"
+      MICRO_REGISTRY: "mdns"
+      DB_HOST: "datastore:27017"
+
+  vessel-service:
+    build: ./vessel-service
+    ports:
+      - 50052:50051
+    environment:
+      MICRO_ADDRESS: ":50051"
+      MICRO_REGISTRY: "mdns"
+      DB_HOST: "datastore:27017"
+
+  user-service:
+    build: ./user-service
+    ports:
+      - 50053:50051
+    environment:
+      MICRO_ADDRESS: ":50051"
+      MICRO_REGISTRY: "mdns"
+      DB_NAME: "postgres"
+      DB_HOST: "database"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "postgres"
+
+  datastore:
+    image: mongo
+    ports:
+      - 27017:27017
+
+  database:
+    image: postgres
+    ports:
+      - 5432:5432

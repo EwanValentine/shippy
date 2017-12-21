@@ -48,15 +48,15 @@ func main() {
 		log.Fatalf("Could not parse file: %v", err)
 	}
 
-	r, err := client.CreateConsignment(context.TODO(), consignment)
+	ctx := metadata.NewContext(context.Background(), map[string]string{
+		"token": token,
+	})
+
+	r, err := client.CreateConsignment(ctx, consignment)
 	if err != nil {
 		log.Fatalf("Could not create: %v", err)
 	}
 	log.Printf("Created: %t", r.Created)
-
-	ctx := metadata.NewContext(context.Background(), map[string]string{
-		"token": token,
-	})
 
 	getAll, err := client.GetConsignments(ctx, &pb.GetRequest{})
 	if err != nil {

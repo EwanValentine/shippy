@@ -2,14 +2,15 @@ package main
 
 import (
 	"errors"
-	"golang.org/x/net/context"
+	"log"
+
 	pb "github.com/EwanValentine/shippy/user-service/proto/user"
 	"golang.org/x/crypto/bcrypt"
-	"log"
+	"golang.org/x/net/context"
 )
 
 type service struct {
-	repo Repository
+	repo         Repository
 	tokenService Authable
 }
 
@@ -72,10 +73,11 @@ func (srv *service) ValidateToken(ctx context.Context, req *pb.Token, res *pb.To
 
 	// Decode token
 	claims, err := srv.tokenService.Decode(req.Token)
-
 	if err != nil {
 		return err
 	}
+
+	log.Println(claims)
 
 	if claims.User.Id == "" {
 		return errors.New("invalid user")
