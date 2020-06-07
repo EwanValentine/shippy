@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  consignment:
+    build: ./shippy-service-consignment
+
+  vessel:
+    build: ./shippy-service-vessel
+
+  cli:
+    build: ./shippy-cli-consignment

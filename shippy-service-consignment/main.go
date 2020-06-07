@@ -84,7 +84,6 @@ func (s *vesselService) GetConsignments(ctx context.Context, req *pb.GetRequest,
 }
 
 func main() {
-
 	repo := &Repository{}
 
 	// Set-up micro instance
