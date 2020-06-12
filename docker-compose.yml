@@ -9,6 +9,8 @@ services:
     depends_on:
       - datastore
       - vessel
+    links:
+      - datastore
     ports:
       - 50051:50051
     environment:
@@ -25,30 +27,41 @@ services:
       DB_HOST: "mongodb://datastore:27017"
 
   user:
+    restart: always
     build: ./shippy-service-user
     ports:
       - 50053:50051
     environment:
       MICRO_ADDRESS: ":50051"
+      DB_HOST: "database"
+      DB_USER: "admin"
+      DB_PASSWORD: "password"
+      DB_NAME: "postgres"
 
   # Commands
   cli:
     build: ./shippy-cli-consignment
 
+  user-cli:
+    build: ./shippy-cli-user
+
   # Database tier
   datastore:
     image: mongo
-    container_name: "datastore"
+    container_name: datastore
     environment:
       - MONGO_DATA_DIR=/data/db
       - MONGO_LOG_DIR=/dev/null
     volumes:
       - ./data/db:/data/db # ensures data persistence between restarting
     ports:
-      - 27017
+      - 27017:27017
     command: mongod --logpath=/dev/null
 
   database:
     image: postgres:alpine
+    environment:
+      POSTGRES_PASSWORD: "password"
+      POSTGRES_USER: "admin"
     ports:
       - 5432:5432
